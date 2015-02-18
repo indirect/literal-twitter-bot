@@ -43,7 +43,7 @@ get "/:screen_name" do
   sent_id = redis.get("#{screen_name}:last_sent_id")
 
   halt 404 if seen_id.nil?
-  halt 304 if sent_id && sent_id < seen_id
+  halt 304 if sent_id && sent_id >= seen_id
 
   redis.set("#{screen_name}:last_sent_id", seen_id, ex: 30)
 
