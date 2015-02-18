@@ -36,7 +36,7 @@ private
     last_seen_id = redis.get("#{screen_name}:last_seen_id")
     last = mentions_for(screen_name, last_seen_id).first
 
-    if last_seen_id.nil? || (last && last.id > last_seen_id)
+    if last_seen_id.nil? || (last && last.id > last_seen_id.to_i)
       redis.set("#{screen_name}:last_seen_id", last.id, ex: 30)
       redis.set("#{screen_name}:last_seen_tweet", "#{last.user.screen_name}: #{last.full_text}", ex: 30)
     end
@@ -44,7 +44,7 @@ private
 
   def mentions_for(screen_name, last_id)
     options = {result_type: "recent"}
-    options[:since_id] = last_id.to_s if last_id
+    options[:since_id] = last_id if last_id
 
     twitter.search("to:#{screen_name}", options)
   rescue Twitter::Error::TooManyRequests => error
