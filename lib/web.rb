@@ -41,13 +41,13 @@ get "/:screen_name" do
   seen_id = redis.get("#{screen_name}:last_seen_id")
   sent_id = redis.get("#{screen_name}:last_sent_id")
 
-  if (seen_id && sent_id.nil?) || (sent_id && sent_id < seen_id)
-    redis.set("#{screen_name}:last_sent_id", seen_id, ex: 30)
-    content_type "text/plain"
-    body settings.redis.get("#{screen_name}:last_seen_tweet")
-  else
-    halt 304
-  end
+  halt 404 if seen_id.nil?
+  halt 304 if sent_id && sent_id < seen_id
+
+  redis.set("#{screen_name}:last_sent_id", seen_id, ex: 30)
+
+  content_type "text/plain"
+  body redis.get("#{screen_name}:last_seen_tweet")
 end
 
 helpers do
@@ -65,13 +65,17 @@ helpers do
 
     if screen_name_exists?(screen_name)
       redis.set("screen_name:#{screen_name}", 1, ex: 10)
+      sleep 4 # so the worker can notice and start monitoring
+      halt 200, "Now checking for new mentions..."
+    else
+      halt 404, "Screen name #{screen_name} does not exist"
     end
   end
 
   def screen_name_exists?(screen_name)
     twitter.user(screen_name)
   rescue Twitter::Error::NotFound
-    halt 404, "The screen name #{screen_name} does not exist"
+    false
   end
 
 end
