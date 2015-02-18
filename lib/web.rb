@@ -14,7 +14,7 @@ before do
   end
 
   if ENV["REDIS_URL_KEY"]
-    @redis = Redis.new(ENV.fetch(ENV["REDIS_URL_KEY"]))
+    @redis = Redis.new(url: ENV.fetch(ENV["REDIS_URL_KEY"]))
   else
     @redis = Redis.new
   end
