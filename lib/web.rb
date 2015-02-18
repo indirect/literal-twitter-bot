@@ -36,6 +36,7 @@ end
 
 get "/:screen_name" do
   screen_name = params[:screen_name]
+
   enable_mentions_check_for(screen_name)
 
   seen_id = redis.get("#{screen_name}:last_seen_id")
@@ -64,7 +65,7 @@ helpers do
     return if redis.get("screen_name:#{screen_name}")
 
     if screen_name_exists?(screen_name)
-      redis.set("screen_name:#{screen_name}", 1, ex: 10)
+      redis.set("screen_name:#{screen_name}", 1, ex: 30)
       sleep 4 # so the worker can notice and start monitoring
       halt 200, "Now checking for new mentions..."
     else
