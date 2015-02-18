@@ -67,7 +67,7 @@ helpers do
     if screen_name_exists?(screen_name)
       redis.set("screen_name:#{screen_name}", 1, ex: 30)
       sleep 4 # so the worker can notice and start monitoring
-      halt 200, "Now checking for new mentions..."
+      halt 201, "Now checking for new mentions..."
     else
       halt 404, "Screen name #{screen_name} does not exist"
     end
