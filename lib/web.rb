@@ -42,10 +42,11 @@ get "/:screen_name" do
   seen_id = redis.get("#{screen_name}:last_seen_id")
   sent_id = redis.get("#{screen_name}:last_sent_id")
 
-  halt 404 if seen_id.nil?
-  halt 304 if sent_id && sent_id >= seen_id
+  halt 404, "Not found" if seen_id.nil?
 
-  redis.set("#{screen_name}:last_sent_id", seen_id, ex: 30)
+  if sent_id && sent_id >= seen_id
+    redis.set("#{screen_name}:last_sent_id", seen_id, ex: 30)
+  end
 
   content_type "text/plain"
   body redis.get("#{screen_name}:last_seen_tweet")
