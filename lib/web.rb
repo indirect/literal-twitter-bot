@@ -42,14 +42,14 @@ get "/:screen_name" do
   seen_id = redis.get("#{screen_name}:last_seen_id")
   sent_id = redis.get("#{screen_name}:last_sent_id")
 
-  halt 404, "Not found" if seen_id.nil?
+  halt 404, "Not found\n" if seen_id.nil?
 
   if sent_id && sent_id >= seen_id
     redis.set("#{screen_name}:last_sent_id", seen_id, ex: 30)
   end
 
   content_type "text/plain"
-  body redis.get("#{screen_name}:last_seen_tweet")
+  body redis.get("#{screen_name}:last_seen_tweet") << "\n"
 end
 
 helpers do
@@ -68,9 +68,9 @@ helpers do
     if screen_name_exists?(screen_name)
       redis.set("screen_name:#{screen_name}", 1, ex: 30)
       sleep 4 # so the worker can notice and start monitoring
-      halt 201, "Now checking for new mentions..."
+      halt 201, "Now checking for new mentions...\n"
     else
-      halt 404, "Screen name #{screen_name} does not exist"
+      halt 404, "Screen name #{screen_name} does not exist\n"
     end
   end
 
