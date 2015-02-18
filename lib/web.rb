@@ -13,7 +13,11 @@ before do
     config.bearer_token    = ENV["TWITTER_BEARER_TOKEN"] # optional
   end
 
-  @redis = Redis.new
+  if ENV["REDIS_URL_KEY"]
+    @redis = Redis.new(ENV.fetch(ENV["REDIS_URL_KEY"]))
+  else
+    @redis = Redis.new
+  end
 end
 
 get "/" do
